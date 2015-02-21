@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.2.min.js"></script>
+    <script language="javascript">
+        $(document).ready(function () {
+            // Default to off for now
+            $("#on").fadeOut(10);
+            $("#on,#off").click(on);
+            // Set a reasonable timeout
+            // This works around stalls in localhost connection
+            $.ajaxSetup({
+                timeout: 10000
+            });
+        });
+        function on(event) {
+            $("#lampResponse").html("");
+            $("#on").fadeTo(duration = 200, opacity = 0.5);
+            $.post("lamp?on")
+            .done( function (resp) {
+                $("#on").fadeTo(duration = 100, opacity = 1).fadeIn();
+                $("#lampResponse").html(resp);
+                $("#on,#off").unbind().click(off); })
+            .fail(function (jqXHR, textStatus, errorThrown) {
+                $("#lampResponse").html(textStatus);
+                $("#on").fadeTo(duration = 100, opacity = 0.2).fadeOut();
+                $("#on,#off").unbind().click(on);
+            });
+        }
+        function off(event) {
+            $("#lampResponse").html("");
+            $(this).fadeTo(duration = 200, opacity = 0.5);
+            $.post("lamp?off", function (resp) {
+                $("#on").fadeOut(100);
+                $("#lampResponse").html(resp);
+                $("#on,#off").unbind().click(on);
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                $("#lampResponse").html(textStatus);
+                $("#on").fadeTo(duration = 100, opacity = 0.8);
+                $("#on,#off").unbind().click(off);
+            });
+        }
+    </script>
+
+
+</head>
+<body style="background-color:black; color:white">
+    <div>
+        <img style="position:absolute;left:0" id="off" height="400" width="300" src="lightoff.jpg" />
+        <img style="position:absolute;left:0" id="on" height="400" width="300" src="lighton.jpg" />
+<!--        <div style="position:absolute;left:0;text-align:center;vertical-align:middle;height:400px;line-height:400px;font-size:500%;width:300px" id="on" src="lighton.jpg">??</div>-->
+        <div style="height:400px"></div>
+    </div>
+    Lamp Status: <span id="lampResponse" />
+</body>
+</html>
