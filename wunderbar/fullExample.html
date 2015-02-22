@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="relayr.js"></script>
+</head>
+<body>
+
+
+</body>
+</html>
+<script>
+
+
+var relayr = RELAYR.init({
+  appId: "GIWoAT8lJfWq1AC6lu2QYkQkk2_2k8cp",
+  redirectUri:"http://localhost"
+});
+
+
+relayr.login({
+  success: function(token){
+
+    relayr.devices().getAllDevices(function(devices){
+      console.log("All my devices", devices)
+      var myDeviceId = devices[0].id;
+      relayr.devices().getDeviceData({
+        deviceId: myDeviceId, 
+        incomingData: function(data){
+          console.log("deviceData", data);
+        }
+      });          
+    });
+  }
+});
+
+</script>
