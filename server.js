@@ -116,17 +116,18 @@ function load_static_file(request, response) {
 http.createServer(function (request, response) {
     var urlParsed = url.parse(request.url);
     var uri = urlParsed.pathname;
+    console.log("URI="+uri);
     var query = urlParsed.query;
     if (uri == "/lamp") {
         if (query == "on") {
-            xbee.localCommand({
-                command: "MY"
-                //commandParameter: [5]
-            }).then(function (response) {
-                console.log("good");
-            }).catch(function(response) {
-                console.log("bad");
-            });
+            //xbee.localCommand({
+            //    command: "MY"
+            //    //commandParameter: [5]
+            //}).then(function (response) {
+            //    console.log("good");
+            //}).catch(function(response) {
+            //    console.log("bad");
+            //});
             xbee.remoteCommand({
                 command: "D1",
                 commandParameter: [5],
@@ -231,8 +232,36 @@ http.createServer(function (request, response) {
         });
     }
     else
+    if (uri == "/stream")
+    {
+        sendSSE(request,response);
+    }
+    else
         load_static_file(request, response);
 }).listen(80);
+
+function sendSSE(request,response)
+{
+  response.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+
+  var id = (new Date()).toLocaleTimeString();
+
+  setInterval(function() {
+    constructSSE(response, id, (new Date()).toLocaleTimeString());
+  }, 5000);
+
+  constructSSE(response, id, (new Date()).toLocaleTimeString());
+}
+
+function constructSSE(res, id, data) {
+  res.write('id: ' + id + '\n');
+  res.write("data: " + data + '\n\n');
+}
+
 
 console.log("Server running at http://localhost:80/");
 console.log("Serial Port:"+ser_portname);
