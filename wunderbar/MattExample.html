@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://developer.relayr.io/relayr-browser-sdk.min.js"></script>
+</head>
+<body>
+
+
+</body>
+</html>
+<script>
+
+
+var relayr = RELAYR.init({
+  appId: "c79e3440-c636-4b49-9be4-304c9e9e8abd"
+});
+
+
+relayr.login({
+  success: function(token){
+
+    relayr.devices().getAllDevices(function(devices){
+      console.log("All my devices", devices)
+      var myDeviceId = devices[0].id;
+      relayr.devices().getDeviceData({
+        deviceId: myDeviceId, 
+        incomingData: function(data){
+          console.log("deviceData",data);
+        }
+      });          
+    });
+  }
+});
+
+</script>
