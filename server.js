@@ -30,6 +30,10 @@ if (ops.xbee) {
             xbee_enabled = true;
             ser_portname = "COM3";
             break;
+        case "edison":
+           xbee_enabled = true;
+           ser_portname = "/dev/ttyMFD1";
+           break;
         case "none":
             xbee_enabled = false;
             break;
@@ -39,9 +43,9 @@ if (ops.xbee) {
     }
 };
 
-
+var xbee;
 if (xbee_enabled) {
-    var xbee = xbeePromise({
+    xbee = xbeePromise({
         api_mode: 2,
         serialport: ser_portname,  
         serialPortOptions: {
@@ -84,14 +88,14 @@ http.createServer(function (request, response) {
     var query = urlParsed.query;
     if (uri == "/lamp") {
         if (query == "on") {
-            //xbee.localCommand({.
-            //    command: "MY"
-            //    //commandParameter: [5]
-            //}).then(function (response) {
-            //    console.log("good");
-            //}).catch(function(response) {
-            //    console.log("bad");
-            //});
+            xbee.localCommand({
+                command: "MY"
+                //commandParameter: [5]
+            }).then(function (response) {
+                console.log("good");
+            }).catch(function(response) {
+                console.log("bad");
+            });
             xbee.remoteCommand({
                 command: "D1",
                 commandParameter: [5],
@@ -154,3 +158,4 @@ http.createServer(function (request, response) {
 }).listen(80);
 
 console.log("Server running at http://localhost:80/");
+console.log("Serial Port:"+ser_portname);
