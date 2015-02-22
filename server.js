@@ -7,6 +7,14 @@
     querystring = require('querystring'),
     stdio = require("stdio"),
     twilio = require('twilio')('AC7239810de85d39898d6b545a64af1c6d','242c0a1d2148bf8cc640096b05dbfa41');
+var sparky = require('./sparkcore.js');
+ 
+var core1 = new sparky({
+    deviceId: '54ff6d066672524819170167',
+    token: '96af3db06c5d1e8d3575c0156f9ad5bc5c1db969',
+//    debug: true
+});
+
 
 var xbeePromise = require('./xbeepromise.js');
 
@@ -55,6 +63,7 @@ if (xbee_enabled) {
         debug: true
     });
 }
+
 
 function load_static_file(request, response) {
     var uri = url.parse(request.url).pathname;
@@ -153,6 +162,20 @@ http.createServer(function (request, response) {
 
         });
     } 
+    else
+    if (uri == "/sparkcore") {
+        led = querystring.parse(query).led;
+        console.log("/sparkcore led=",led);
+        core1.run('led', led, function (core_response) {
+          resp = "/sparkcore led="+led+" : "+core_response;
+          console.log(" : " + core_response);
+          response.writeHead(200);
+          response.write(resp);
+          response.end();
+        });
+
+
+    }
     else
         load_static_file(request, response);
 }).listen(80);
