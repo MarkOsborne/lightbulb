@@ -8,7 +8,29 @@
     stdio = require("stdio"),
     twilio = require('twilio')('AC7239810de85d39898d6b545a64af1c6d','242c0a1d2148bf8cc640096b05dbfa41');
 var sparky = require('./sparkcore.js');
- 
+var relayr = require('relayr');
+
+var wunderground = require('wundergroundnode');
+var wuKey = 'dd5e9ed71875736c';
+var wunder = new wunderground(wuKey);
+
+var relayrKeys = {
+    app_id: "c79e3440-c636-4b49-9be4-304c9e9e8abd",
+//    dev_id: "00c76356-0d20-419e-a8f9-b530e405e2cc", // temp + humidity
+    dev_id: "589b62ef-2e0c-4c01-9ba0-45c7f2c6be2f", // proximity
+    token:  "GIWoAT8lJfWq1AC6lu2QYkQkk2_2k8cp"
+};
+
+relayr.connect(relayrKeys);
+
+relayr.listen(function(err,data){
+    if(err) {
+        console.log("Error: ",err);
+    } else {
+        console.log(data);
+    }
+});
+
 var core1 = new sparky({
     deviceId: '54ff6d066672524819170167',
     token: '96af3db06c5d1e8d3575c0156f9ad5bc5c1db969',
@@ -165,16 +187,48 @@ http.createServer(function (request, response) {
     else
     if (uri == "/sparkcore") {
         led = querystring.parse(query).led;
-        console.log("/sparkcore led=",led);
-        core1.run('led', led, function (core_response) {
-          resp = "/sparkcore led="+led+" : "+core_response;
-          console.log(" : " + core_response);
+        remote = querystring.parse(query).remote;
+        if(remote)
+        {
+          console.log("/sparkcore remote",remote);
+          core1.run('remote', remote, function (core_response) {
+            resp = "/sparkcore remote="+remote+" : "+core_response;
+            console.log(" : " + core_response);
+            response.writeHead(200);
+            response.write(resp);
+            response.end();
+          });
+
+        }
+        else
+        {
+          console.log("/sparkcore led=",led);
+          core1.run('led', led, function (core_response) {
+            resp = "/sparkcore led="+led+" : "+core_response;
+            console.log(" : " + core_response);
+            response.writeHead(200);
+            response.write(resp);
+            response.end();
+          });
+        }
+    }
+    else
+    if (uri == "/wunderground") {
+        zip = querystring.parse(query).zip;
+        wunder.conditions().request(zip, function(err,wuresponse) {
+          icon_url = wuresponse.current_observation.icon_url;
+          temp_f = wuresponse.current_observation.temp_f;
+          location = wuresponse.current_observation.display_location.full;
+           
           response.writeHead(200);
-          response.write(resp);
+          response.write(
+            "<p>"+location+"</p>"
+            +"<img src='"+icon_url+"'/>" 
+            +"<h1>"+temp_f+"</h1>"+"<br/>"
+            //+JSON.stringify(wuresponse)
+          );
           response.end();
         });
-
-
     }
     else
         load_static_file(request, response);
