@@ -180,12 +180,12 @@ http.createServer(function (request, response) {
     else
     if (uri == "/sparkcore") {
         led = querystring.parse(query).led;
-        remote = querystring.parse(query).remote;
-        if(remote)
+        play = querystring.parse(query).play;
+        if(play)
         {
-          console.log("/sparkcore remote",remote);
-          core1.run('remote', remote, function (core_response) {
-            resp = "/sparkcore remote="+remote+" : "+core_response;
+          console.log("/sparkcore play",play);
+          core1.run('play', play, function (core_response) {
+            resp = "/sparkcore play="+play+" : "+core_response;
             console.log(" : " + core_response);
             response.writeHead(200);
             response.write(resp);
