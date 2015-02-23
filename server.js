@@ -23,14 +23,6 @@ var relayrKeys = {
 
 relayr.connect(relayrKeys);
 
-relayr.listen(function(err,data){
-    if(err) {
-        console.log("Error: ",err);
-    } else {
-        console.log(data);
-    }
-});
-
 var core1 = new sparky({
     deviceId: '54ff6d066672524819170167',
     token: '96af3db06c5d1e8d3575c0156f9ad5bc5c1db969',
@@ -120,14 +112,14 @@ http.createServer(function (request, response) {
     var query = urlParsed.query;
     if (uri == "/lamp") {
         if (query == "on") {
-            //xbee.localCommand({
-            //    command: "MY"
+            xbee.localCommand({
+                command: "MY"
             //    //commandParameter: [5]
-            //}).then(function (response) {
-            //    console.log("good");
-            //}).catch(function(response) {
-            //    console.log("bad");
-            //});
+            }).then(function (response) {
+                console.log("good");
+            }).catch(function(response) {
+                console.log("bad");
+            });
             xbee.remoteCommand({
                 command: "D1",
                 commandParameter: [5],
@@ -240,6 +232,15 @@ http.createServer(function (request, response) {
         load_static_file(request, response);
 }).listen(80);
 
+function sparkcore_remote(remote)
+{
+      console.log("/sparkcore remote",remote);
+      core1.run('remote', remote, function (core_response) {
+        resp = "/sparkcore remote="+remote+" : "+core_response;
+        console.log(" : " + core_response);
+      });
+}
+
 function sendSSE(request,response)
 {
   response.writeHead(200, {
@@ -250,11 +251,38 @@ function sendSSE(request,response)
 
   var id = (new Date()).toLocaleTimeString();
 
+  relayr.listen(function(err,data){
+    if(err) {
+        console.log("Error: ",err);
+    } else {
+      if (data)
+      {
+        constructSSE(response, id, data.prox);
+        if(data.prox > 200)
+        {
+          sparkcore_remote(1);
+        }
+      }
+    }
+  });
+
+
   setInterval(function() {
-    constructSSE(response, id, (new Date()).toLocaleTimeString());
+     var data;
+     wunder.conditions().request('98104', function(err,wuresponse) {
+       icon_url = wuresponse.current_observation.icon_url;
+       temp_f = wuresponse.current_observation.temp_f;
+       location = wuresponse.current_observation.display_location.full;
+           
+       data =  "<p>"+location+"</p>"
+        +"<img src='"+icon_url+"'/>" 
+        +"<h1>"+temp_f+"</h1>"+"<br/>";
+        //+JSON.stringify(wuresponse)
+       constructSSE(response, id, data);       
+     })
   }, 5000);
 
-  constructSSE(response, id, (new Date()).toLocaleTimeString());
+  //constructSSE(response, id, (new Date()).toLocaleTimeString());
 }
 
 function constructSSE(res, id, data) {
