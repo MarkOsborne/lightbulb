@@ -1,0 +1,25 @@
+{
+  "name": "NodeServer",
+  "version": "0.0.0",
+  "description": "LightBulb",
+  "main": "server.js",
+  "author": {
+    "name": "Mark",
+    "email": "Osborne"
+  },
+  
+"repository" :
+  { "type" : "git"
+  , "url" : "https://github.com/MarkOsborne/lightbulb.git"
+  },
+"dependencies": {
+    "parambulator": "^1.5.0",
+    "q": "^1.1.2",
+    "relayr": "^0.1.1",
+    "serialport": "1.4.10",
+    "stdio": "^0.2.7",
+    "twilio": "^1.10.0",
+    "wundergroundnode": "^0.9.0",
+    "xbee-api": "^0.3.10"
+  }
+}
